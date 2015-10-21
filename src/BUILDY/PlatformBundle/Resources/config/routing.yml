@@ -1,0 +1,3 @@
+hello_the_world:
+    path:    /hello-world/{name}
+    defaults: { _controller: BUILDYPlatformBundle:Advert:index }
