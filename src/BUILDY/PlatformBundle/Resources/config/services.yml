@@ -1,4 +1,3 @@
 services:
-#    buildy_platform.example:
-#        class: BUILDY\PlatformBundle\Example
-#        arguments: [@service_id, "plain_value", %parameter%]
+    buildy_platform.antispam:
+        class: BUILDY\PlatformBundle\Services\Antispam\BUILDYAntispam

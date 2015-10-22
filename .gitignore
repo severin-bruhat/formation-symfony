@@ -36,3 +36,5 @@
 # Composer PHAR
 /composer.phar
 
+#MacOS files
+.DS_Store
