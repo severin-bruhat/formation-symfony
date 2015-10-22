@@ -1,3 +1,4 @@
 services:
     buildy_platform.antispam:
         class: BUILDY\PlatformBundle\Services\Antispam\BUILDYAntispam
+        arguments: [@mailer, %locale%, 50]
