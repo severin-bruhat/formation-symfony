@@ -12,3 +12,30 @@
 [21-Oct-2015 14:16:49 UTC] PHP   3. Symfony\Component\HttpKernel\Kernel->boot() /home/ubuntu/workspace/app/bootstrap.php.cache:2442
 [21-Oct-2015 14:16:49 UTC] PHP   4. Symfony\Component\HttpKernel\Kernel->initializeBundles() /home/ubuntu/workspace/app/bootstrap.php.cache:2410
 [21-Oct-2015 14:16:49 UTC] PHP   5. AppKernel->registerBundles() /home/ubuntu/workspace/app/bootstrap.php.cache:2581
+[21-Oct-2015 15:38:05 UTC] PHP Fatal error:  Class 'BUILDY\PlatformBundle\Controller\RedirectResponse' not found in /home/ubuntu/workspace/src/BUILDY/PlatformBundle/Controller/AdvertController.php on line 21
+[21-Oct-2015 15:38:05 UTC] PHP Stack trace:
+[21-Oct-2015 15:38:05 UTC] PHP   1. {main}() /home/ubuntu/workspace/web/app_dev.php:0
+[21-Oct-2015 15:38:05 UTC] PHP   2. Symfony\Component\HttpKernel\Kernel->handle() /home/ubuntu/workspace/web/app_dev.php:30
+[21-Oct-2015 15:38:05 UTC] PHP   3. Symfony\Component\HttpKernel\DependencyInjection\ContainerAwareHttpKernel->handle() /home/ubuntu/workspace/app/bootstrap.php.cache:2444
+[21-Oct-2015 15:38:05 UTC] PHP   4. Symfony\Component\HttpKernel\HttpKernel->handle() /home/ubuntu/workspace/app/bootstrap.php.cache:3222
+[21-Oct-2015 15:38:05 UTC] PHP   5. Symfony\Component\HttpKernel\HttpKernel->handleRaw() /home/ubuntu/workspace/app/bootstrap.php.cache:3071
+[21-Oct-2015 15:38:05 UTC] PHP   6. call_user_func_array:{/home/ubuntu/workspace/app/bootstrap.php.cache:3109}() /home/ubuntu/workspace/app/bootstrap.php.cache:3109
+[21-Oct-2015 15:38:05 UTC] PHP   7. BUILDY\PlatformBundle\Controller\AdvertController->viewAction() /home/ubuntu/workspace/app/bootstrap.php.cache:3109
+[21-Oct-2015 15:44:01 UTC] PHP Fatal error:  Class 'BUILDY\PlatformBundle\Controller\Response' not found in /home/ubuntu/workspace/src/BUILDY/PlatformBundle/Controller/AdvertController.php on line 21
+[21-Oct-2015 15:44:01 UTC] PHP Stack trace:
+[21-Oct-2015 15:44:01 UTC] PHP   1. {main}() /home/ubuntu/workspace/web/app_dev.php:0
+[21-Oct-2015 15:44:01 UTC] PHP   2. Symfony\Component\HttpKernel\Kernel->handle() /home/ubuntu/workspace/web/app_dev.php:30
+[21-Oct-2015 15:44:01 UTC] PHP   3. Symfony\Component\HttpKernel\DependencyInjection\ContainerAwareHttpKernel->handle() /home/ubuntu/workspace/app/bootstrap.php.cache:2444
+[21-Oct-2015 15:44:01 UTC] PHP   4. Symfony\Component\HttpKernel\HttpKernel->handle() /home/ubuntu/workspace/app/bootstrap.php.cache:3222
+[21-Oct-2015 15:44:01 UTC] PHP   5. Symfony\Component\HttpKernel\HttpKernel->handleRaw() /home/ubuntu/workspace/app/bootstrap.php.cache:3071
+[21-Oct-2015 15:44:01 UTC] PHP   6. call_user_func_array:{/home/ubuntu/workspace/app/bootstrap.php.cache:3109}() /home/ubuntu/workspace/app/bootstrap.php.cache:3109
+[21-Oct-2015 15:44:01 UTC] PHP   7. BUILDY\PlatformBundle\Controller\AdvertController->viewAction() /home/ubuntu/workspace/app/bootstrap.php.cache:3109
+[21-Oct-2015 16:04:50 UTC] PHP Fatal error:  Class 'BUILDY\PlatformBundle\Controller\NotFoundHttpException' not found in /home/ubuntu/workspace/src/BUILDY/PlatformBundle/Controller/AdvertController.php on line 19
+[21-Oct-2015 16:04:50 UTC] PHP Stack trace:
+[21-Oct-2015 16:04:50 UTC] PHP   1. {main}() /home/ubuntu/workspace/web/app_dev.php:0
+[21-Oct-2015 16:04:50 UTC] PHP   2. Symfony\Component\HttpKernel\Kernel->handle() /home/ubuntu/workspace/web/app_dev.php:30
+[21-Oct-2015 16:04:50 UTC] PHP   3. Symfony\Component\HttpKernel\DependencyInjection\ContainerAwareHttpKernel->handle() /home/ubuntu/workspace/app/bootstrap.php.cache:2444
+[21-Oct-2015 16:04:50 UTC] PHP   4. Symfony\Component\HttpKernel\HttpKernel->handle() /home/ubuntu/workspace/app/bootstrap.php.cache:3222
+[21-Oct-2015 16:04:50 UTC] PHP   5. Symfony\Component\HttpKernel\HttpKernel->handleRaw() /home/ubuntu/workspace/app/bootstrap.php.cache:3071
+[21-Oct-2015 16:04:50 UTC] PHP   6. call_user_func_array:{/home/ubuntu/workspace/app/bootstrap.php.cache:3109}() /home/ubuntu/workspace/app/bootstrap.php.cache:3109
+[21-Oct-2015 16:04:50 UTC] PHP   7. BUILDY\PlatformBundle\Controller\AdvertController->indexAction() /home/ubuntu/workspace/app/bootstrap.php.cache:3109
