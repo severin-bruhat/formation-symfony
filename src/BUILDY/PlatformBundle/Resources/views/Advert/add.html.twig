@@ -1,0 +1,23 @@
+{# src/BUILDY/PlatformBundle/Resources/views/Advert/edit.html.twig #}
+
+{% extends "BUILDYPlatformBundle::layout.html.twig" %}
+
+{% block title %}
+  Ajouter une annonce - {{ parent() }}
+{% endblock %}
+
+{% block buildyplatform_body %}
+
+  <h2>Ajouter une annonce</h2>
+
+  {{ include("BUILDYPlatformBundle:Advert:form.html.twig") }}
+
+  
+  <p>
+    <a href="{{ path('buildy_platform_home') }}" class="btn btn-default">
+      <i class="glyphicon glyphicon-chevron-left"></i>
+      Retour à l'accueil
+    </a>
+  </p>
+
+{% endblock %}
