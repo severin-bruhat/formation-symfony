@@ -66,6 +66,11 @@ class Advert
    private $categories;
 
     /**
+    * @ORM\OneToMany(targetEntity="BUILDY\PlatformBundle\Entity\Application", mappedBy="advert")
+    */
+    private $applications; // Notez le « s », une annonce est liée à plusieurs candidatures
+
+    /**
     * Constructor
     */
     public function __construct()
@@ -248,5 +253,43 @@ class Advert
     public function getCategories()
     {
       return $this->categories;
+    }
+
+    /**
+     * Add application
+     *
+     * @param \BUILDY\PlatformBundle\Entity\Application $application
+     *
+     * @return Advert
+     */
+    public function addApplication(\BUILDY\PlatformBundle\Entity\Application $application)
+    {
+        $this->applications[] = $application;
+        // On lie l'annonce à la candidature
+        $application->setAdvert($this);
+
+        return $this;
+    }
+
+    /**
+     * Remove application
+     *
+     * @param \BUILDY\PlatformBundle\Entity\Application $application
+     */
+    public function removeApplication(\BUILDY\PlatformBundle\Entity\Application $application)
+    {
+        $this->applications->removeElement($application);
+        // Et si notre relation était facultative (nullable=true, ce qui n'est pas notre cas ici attention) :
+        // $application->setAdvert(null);
+    }
+
+    /**
+     * Get applications
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getApplications()
+    {
+        return $this->applications;
     }
 }
