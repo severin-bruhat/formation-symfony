@@ -8,6 +8,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use BUILDY\PlatformBundle\Entity\Advert;
+use BUILDY\PlatformBundle\Entity\Image;
+use BUILDY\PlatformBundle\Entity\Application;
+use BUILDY\PlatformBundle\Entity\AdvertSkill;
 
 class AdvertController extends Controller
 {
@@ -45,35 +48,99 @@ class AdvertController extends Controller
 
     public function viewAction($id){
 
-        // On récupère le repository
-        $repository = $this->getDoctrine()
-          ->getManager()
-          ->getRepository('BUILDYPlatformBundle:Advert')
-        ;
+        $em = $this->getDoctrine()->getManager();
+
 
         // On récupère l'entité correspondante à l'id $id
-        $advert = $repository->find($id);
+        $advert = $em
+          ->getRepository('BUILDYPlatformBundle:Advert')
+          ->find($id);
+
         if (null === $advert) {
             throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
         }
+
+        // On récupère la liste des candidatures de cette annonce
+        $listApplications = $em
+          ->getRepository('BUILDYPlatformBundle:Application')
+          ->findBy(array('advert' => $advert))
+        ;
+
+        // On récupère maintenant la liste des AdvertSkill
+        $listAdvertSkills = $em
+          ->getRepository('BUILDYPlatformBundle:AdvertSkill')
+          ->findBy(array('advert' => $advert))
+        ;
+
         return $this->render('BUILDYPlatformBundle:Advert:view.html.twig', array(
-          'advert' => $advert
+          'advert'           => $advert,
+          'listApplications' => $listApplications,
+          'listAdvertSkills' => $listAdvertSkills
         ));
     }
 
     public function addAction(Request $request){
 
+      $em = $this->getDoctrine()->getManager();
+
       // Création de l'entité
       $advert = new Advert();
       $advert->setTitle('Recherche développeur Symfony2.');
-      $advert->setAuthor('Alexandre');
+      $advert->setAuthor('Séverin');
       $advert->setContent("Nous recherchons un développeur Symfony2 débutant sur Lyon. Blabla…");
+
+      // Création de l'entité Image
+      $image = new Image();
+      $image->setUrl('http://sdz-upload.s3.amazonaws.com/prod/upload/job-de-reve.jpg');
+      $image->setAlt('Job de rêve');
+
+      // On lie l'image à l'annonce
+      $advert->setImage($image);
+
+      // Création d'une première candidature
+      $application1 = new Application();
+      $application1->setAuthor('Marine');
+      $application1->setContent("J'ai toutes les qualités requises.");
+
+      // Création d'une deuxième candidature par exemple
+      $application2 = new Application();
+      $application2->setAuthor('Pierre');
+      $application2->setContent("Je suis très motivé.");
+
+      // On lie les candidatures à l'annonce
+      $application1->setAdvert($advert);
+      $application2->setAdvert($advert);
+
+      // On récupère toutes les compétences possibles
+      $listSkills = $em->getRepository('BUILDYPlatformBundle:Skill')->findAll();
+
+      // Pour chaque compétence
+      foreach ($listSkills as $skill) {
+        // On crée une nouvelle « relation entre 1 annonce et 1 compétence »
+        $advertSkill = new AdvertSkill();
+
+        // On la lie à l'annonce, qui est ici toujours la même
+        $advertSkill->setAdvert($advert);
+        // On la lie à la compétence, qui change ici dans la boucle foreach
+        $advertSkill->setSkill($skill);
+
+        // Arbitrairement, on dit que chaque compétence est requise au niveau 'Expert'
+        $advertSkill->setLevel('Expert');
+
+        // Et bien sûr, on persiste cette entité de relation, propriétaire des deux autres relations
+        $em->persist($advertSkill);
+      }
 
       // On récupère l'EntityManager
       $em = $this->getDoctrine()->getManager();
 
       // Étape 1 : On « persiste » l'entité
       $em->persist($advert);
+
+      // Étape 1 bis : pour cette relation pas de cascade lorsqu'on persiste Advert, car la relation est
+      // définie dans l'entité Application et non Advert. On doit donc tout persister à la main ici.
+      $em->persist($application1);
+      $em->persist($application2);
 
       // Étape 2 : On « flush » tout ce qui a été persisté avant
       $em->flush();
@@ -100,14 +167,23 @@ class AdvertController extends Controller
           return $this->redirect($this->generateUrl('buildy_platform_view', array('id' => 5)));
         }
 
+        $em = $this->getDoctrine()->getManager();
+        $advert = $em->getRepository('BUILDYPlatformBundle:Advert')->find($id);
 
-        $advert = array(
-          'title'   => 'Recherche développpeur Symfony2',
-          'id'      => $id,
-          'author'  => 'Alexandre',
-          'content' => 'Nous recherchons un développeur Symfony2 débutant sur Lyon. Blabla…',
-          'date'    => new \Datetime()
-        );
+        if (null === $advert) {
+          throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
+        }
+
+        // La méthode findAll retourne toutes les catégories de la base de données
+        $listCategories = $em->getRepository('BUILDYPlatformBundle:Category')->findAll();
+
+        // On boucle sur les catégories pour les lier à l'annonce
+        foreach ($listCategories as $category) {
+          $advert->addCategory($category);
+        }
+
+        $em->flush();
+
 
         return $this->render('BUILDYPlatformBundle:Advert:edit.html.twig', array(
           'advert' => $advert
@@ -116,9 +192,22 @@ class AdvertController extends Controller
 
     public function deleteAction($id)
     {
-        // Ici, on récupérera l'annonce correspondant à $id
-        // Ici, on gérera la suppression de l'annonce en question
-        return $this->render('BUILDYPlatformBundle:Advert:delete.html.twig');
+      $em = $this->getDoctrine()->getManager();
+
+      // On récupère l'annonce $id
+      $advert = $em->getRepository('BUILDYPlatformBundle:Advert')->find($id);
+
+      if (null === $advert) {
+      throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
+      }
+
+      // On boucle sur les catégories de l'annonce pour les supprimer
+      foreach ($advert->getCategories() as $category) {
+      $advert->removeCategory($category);
+      }
+      $em->flush();
+
+      return $this->render('BUILDYPlatformBundle:Advert:delete.html.twig');
     }
 
     public function menuAction($limit)

@@ -15,6 +15,38 @@
     {{ advert.content }}
   </div>
 
+  {# On vérifie qu'une image soit bien associée à l'annonce #}
+  {% if advert.image is not null %}
+    <img src="{{ advert.image.url }}" alt="{{ advert.image.alt }}">
+  {% endif %}
+
+  <ul>
+  {% for app in listApplications %}
+    <li> {{app.author}} : {{app.content}} </li>
+  {% endfor %}
+  </ul>
+
+  {% if not advert.categories.empty %}
+    <p>
+      Cette annonce est parue dans les catégories suivantes :
+      {% for category in advert.categories %}
+        {{ category.name }}{% if not loop.last %}, {% endif %}
+      {% endfor %}
+    </p>
+  {% endif %}
+
+  {% if listAdvertSkills|length > 0 %}
+    <div>
+      Cette annonce requiert les compétences suivantes :
+      <ul>
+        {% for advertSkill in listAdvertSkills %}
+          <li>{{ advertSkill.skill.name }} : niveau {{ advertSkill.level }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+
   <p>
     <a href="{{ path('buildy_platform_home') }}" class="btn btn-default">
       <i class="glyphicon glyphicon-chevron-left"></i>
