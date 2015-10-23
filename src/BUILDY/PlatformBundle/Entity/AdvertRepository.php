@@ -2,6 +2,8 @@
 
 namespace BUILDY\PlatformBundle\Entity;
 
+use Doctrine\ORM\QueryBuilder;
+
 /**
  * AdvertRepository
  *
@@ -10,4 +12,95 @@ namespace BUILDY\PlatformBundle\Entity;
  */
 class AdvertRepository extends \Doctrine\ORM\EntityRepository
 {
+    /**
+    * My personnel findAll method
+    */
+    public function myFindAll()
+    {
+        return $queryBuilder = $this
+            ->createQueryBuilder('a')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
+    * My personnel findOne method
+    */
+    public function myFindOne($id)
+    {
+        return $this
+          ->createQueryBuilder('a')
+          ->where('a.id = :id')
+          ->setParameter('id', $id)
+          ->getQuery()
+          ->getResult();
+    }
+
+    /**
+     * conditions : postées durant l'année en cours
+     * @param  QueryBuilder $qb [description]
+     * @return [type]           [description]
+     */
+    public function whereCurrentYear(QueryBuilder $qb)
+    {
+      $qb
+        ->andWhere('a.date BETWEEN :start AND :end')
+        ->setParameter('start', new \Datetime(date('Y').'-01-01'))  // Date entre le 1er janvier de cette année
+        ->setParameter('end',   new \Datetime(date('Y').'-12-31'))  // Et le 31 décembre de cette année
+      ;
+    }
+    /**
+     * myFind method
+     * @return array object array
+     */
+    public function myFind()
+    {
+      $qb = $this
+        ->createQueryBuilder('a')
+        ->where('a.author = :author')
+        ->setParameter('author', 'Marine')
+      ;
+      $this->whereCurrentYear($qb);
+      $qb->orderBy('a.date', 'DESC');
+
+      return $qb
+        ->getQuery()
+        ->getResult()
+      ;
+   }
+    /**
+     * [getAdvertWithApplications description]
+     * @return [type] [description]
+     */
+    public function getAdvertWithApplications()
+    {
+      $qb = $this
+        ->createQueryBuilder('a')
+        ->leftJoin('a.applications', 'app')
+        ->addSelect('app')
+      ;
+      return $qb
+        ->getQuery()
+        ->getResult()
+      ;
+    }
+
+    /**
+     * [getAdvertWithCategories description]
+     * @param  array  $categoryNames [description]
+     * @return [type]                [description]
+     */
+    public function getAdvertWithCategories(array $categoryNames)
+    {
+      $qb = $this->createQueryBuilder('a')
+            ->leftJoin('a.categories', 'cat')
+            ->addSelect('cat')
+            ->where($qb->expr()->in('c.name', $categoryNames))
+      ;
+      
+      return $qb
+        ->getQuery()
+        ->getResult()
+      ;
+    }
 }
