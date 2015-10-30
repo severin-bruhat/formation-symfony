@@ -1,0 +1,7 @@
+buildy_core_homepage:
+    path:     /
+    defaults: { _controller: BUILDYCoreBundle:Default:index }
+
+buildy_core_contact:
+    path:     /contact
+    defaults: { _controller: BUILDYCoreBundle:Default:contact }

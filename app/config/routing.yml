@@ -1,3 +1,7 @@
+buildy_core:
+    resource: "@BUILDYCoreBundle/Resources/config/routing.yml"
+    prefix:   /
+
 buildy_platform:
     resource: "@BUILDYPlatformBundle/Resources/config/routing.yml"
     prefix:   /platform

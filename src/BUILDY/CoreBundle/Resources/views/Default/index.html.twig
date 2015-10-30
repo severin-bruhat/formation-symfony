@@ -1,0 +1,38 @@
+{# src/BUILDY/CoreBundle/Resources/views/Default/index.html.twig #}
+
+{% extends "BUILDYCoreBundle::base.html.twig" %}
+
+{% block title %}
+  Accueil - {{ parent() }}
+{% endblock %}
+
+{% block buildycore_body %}
+  <div class="container">
+
+    <h1>Page d'accueil</h1>
+
+    <div class="bg-info">
+      {% for message in app.session.flashbag.get('info') %}
+        <p>Message flash : {{ message }}</p>
+      {% endfor %}
+    </div>
+
+
+      <p>Vous trouverez ci-dessous les 3 dernières annonces</p>
+
+      <ul>
+        {% for advert in listAdverts %}
+          <li>
+            <a href="{{ path('buildy_platform_view', {'id': advert.id}) }}">
+              {{ advert.title }}
+            </a>
+            par {{ advert.author }},
+            le {{ advert.date|date('d/m/Y') }}
+          </li>
+        {% else %}
+          <li>Pas (encore !) d'annonces</li>
+        {% endfor %}
+      </ul>
+  </div>
+
+{% endblock %}

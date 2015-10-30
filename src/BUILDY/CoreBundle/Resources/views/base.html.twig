@@ -1,0 +1,14 @@
+{# src/BUILDY/CoreBundle/Resources/views/base.html.twig #}
+
+{% extends "::base.html.twig" %}
+
+{% block title %}
+  Annonces - {{ parent() }}
+{% endblock %}
+
+{% block body %}
+
+  {% block buildycore_body %}
+  {% endblock %}
+
+{% endblock %}
