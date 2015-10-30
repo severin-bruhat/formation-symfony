@@ -20,12 +20,6 @@
     <img src="{{ advert.image.url }}" alt="{{ advert.image.alt }}">
   {% endif %}
 
-  <ul>
-  {% for app in listApplications %}
-    <li> {{app.author}} : {{app.content}} </li>
-  {% endfor %}
-  </ul>
-
   {% if not advert.categories.empty %}
     <p>
       Cette annonce est parue dans les catégories suivantes :

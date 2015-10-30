@@ -1,250 +1,146 @@
 <?php
-
 // src/BUILDY/PlatformBundle/Controller/AdvertController.php
 
 namespace BUILDY\PlatformBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use BUILDY\PlatformBundle\Entity\Advert;
-use BUILDY\PlatformBundle\Entity\Image;
-use BUILDY\PlatformBundle\Entity\Application;
-use BUILDY\PlatformBundle\Entity\AdvertSkill;
 
 class AdvertController extends Controller
 {
-    public function indexAction($page)
-    {
-        if ($page < 1) {
-          // On déclenche une exception NotFoundHttpException, cela va afficher
-          // une page d'erreur 404 (qu'on pourra personnaliser plus tard d'ailleurs)
-          throw new NotFoundHttpException('Page "'.$page.'" inexistante.');
-        }
-
-        $listAdverts = array(
-          array(
-            'title'   => 'Recherche développpeur Symfony2',
-            'id'      => 1,
-            'author'  => 'Alexandre',
-            'content' => 'Nous recherchons un développeur Symfony2 débutant sur Lyon. Blabla…',
-            'date'    => new \Datetime()),
-          array(
-            'title'   => 'Mission de webmaster',
-            'id'      => 2,
-            'author'  => 'Hugo',
-            'content' => 'Nous recherchons un webmaster capable de maintenir notre site internet. Blabla…',
-            'date'    => new \Datetime()),
-          array(
-            'title'   => 'Offre de stage webdesigner',
-            'id'      => 3,
-            'author'  => 'Mathieu',
-            'content' => 'Nous proposons un poste pour webdesigner. Blabla…',
-            'date'    => new \Datetime())
-        );
-
-        return $this->render('BUILDYPlatformBundle:Advert:index.html.twig', array('listAdverts' => $listAdverts));
+  public function indexAction($page)
+  {
+    if ($page < 1) {
+      throw $this->createNotFoundException("La page ".$page." n'existe pas.");
     }
 
-    public function viewAction($id){
+    $nbPerPage = $this->container->getParameter('nb_per_page_home');
 
-        $em = $this->getDoctrine()->getManager();
+    // Pour récupérer la liste de toutes les annonces : on utilise findAll()
+    $listAdverts = $this->getDoctrine()
+      ->getManager()
+      ->getRepository('BUILDYPlatformBundle:Advert')
+      ->getAdverts($page, $nbPerPage)
+    ;
 
+    // On calcule le nombre total de pages grâce au count($listAdverts) qui retourne le nombre total d'annonces
+    $nbPages = ceil(count($listAdverts)/$nbPerPage);
 
-        // On récupère l'entité correspondante à l'id $id
-        $advert = $em
-          ->getRepository('BUILDYPlatformBundle:Advert')
-          ->find($id);
-
-        if (null === $advert) {
-            throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
-        }
-
-        // On récupère la liste des candidatures de cette annonce
-        $listApplications = $em
-          ->getRepository('BUILDYPlatformBundle:Application')
-          ->findBy(array('advert' => $advert))
-        ;
-
-        // On récupère maintenant la liste des AdvertSkill
-        $listAdvertSkills = $em
-          ->getRepository('BUILDYPlatformBundle:AdvertSkill')
-          ->findBy(array('advert' => $advert))
-        ;
-
-        return $this->render('BUILDYPlatformBundle:Advert:view.html.twig', array(
-          'advert'           => $advert,
-          'listApplications' => $listApplications,
-          'listAdvertSkills' => $listAdvertSkills
-        ));
+    // Si la page n'existe pas, on retourne une 404
+    if ($page > $nbPages) {
+      throw $this->createNotFoundException("La page ".$page." n'existe pas.");
     }
 
-    public function addAction(Request $request){
+    // L'appel de la vue ne change pas
+    return $this->render('BUILDYPlatformBundle:Advert:index.html.twig', array(
+      'listAdverts' => $listAdverts,
+      'nbPages'     => $nbPages,
+      'page'        => $page
+    ));
+  }
 
-      $em = $this->getDoctrine()->getManager();
+  public function viewAction($id)
+  {
+    // On récupère l'EntityManager
+    $em = $this->getDoctrine()->getManager();
 
-      // Création de l'entité
-      $advert = new Advert();
-      $advert->setTitle('Recherche développeur Symfony2.');
-      $advert->setAuthor('Séverin');
-      $advert->setContent("Nous recherchons un développeur Symfony2 débutant sur Lyon. Blabla…");
+    // Pour récupérer une annonce unique : on utilise find()
+    $advert = $em->getRepository('BUILDYPlatformBundle:Advert')->find($id);
 
-      // Création de l'entité Image
-      $image = new Image();
-      $image->setUrl('http://sdz-upload.s3.amazonaws.com/prod/upload/job-de-reve.jpg');
-      $image->setAlt('Job de rêve');
-
-      // On lie l'image à l'annonce
-      $advert->setImage($image);
-
-      // Création d'une première candidature
-      $application1 = new Application();
-      $application1->setAuthor('Marine');
-      $application1->setContent("J'ai toutes les qualités requises.");
-
-      // Création d'une deuxième candidature par exemple
-      $application2 = new Application();
-      $application2->setAuthor('Pierre');
-      $application2->setContent("Je suis très motivé.");
-
-      // On lie les candidatures à l'annonce
-      $application1->setAdvert($advert);
-      $application2->setAdvert($advert);
-
-      // On récupère toutes les compétences possibles
-      $listSkills = $em->getRepository('BUILDYPlatformBundle:Skill')->findAll();
-
-      // Pour chaque compétence
-      foreach ($listSkills as $skill) {
-        // On crée une nouvelle « relation entre 1 annonce et 1 compétence »
-        $advertSkill = new AdvertSkill();
-
-        // On la lie à l'annonce, qui est ici toujours la même
-        $advertSkill->setAdvert($advert);
-        // On la lie à la compétence, qui change ici dans la boucle foreach
-        $advertSkill->setSkill($skill);
-
-        // Arbitrairement, on dit que chaque compétence est requise au niveau 'Expert'
-        $advertSkill->setLevel('Expert');
-
-        // Et bien sûr, on persiste cette entité de relation, propriétaire des deux autres relations
-        $em->persist($advertSkill);
-      }
-
-
-      // Étape 1 : On « persiste » l'entité
-      $em->persist($advert);
-
-      // Étape 1 bis : pour cette relation pas de cascade lorsqu'on persiste Advert, car la relation est
-      // définie dans l'entité Application et non Advert. On doit donc tout persister à la main ici.
-      $em->persist($application1);
-      $em->persist($application2);
-
-      // Étape 2 : On « flush » tout ce qui a été persisté avant
-      $em->flush();
-
-
-        // La gestion d'un formulaire est particulière, mais l'idée est la suivante :
-        // Si la requête est en POST, c'est que le visiteur a soumis le formulaire
-        if ($request->isMethod('POST')) {
-
-            // Ici, on s'occupera de la création et de la gestion du formulaire
-            $request->getSession()->getFlashBag()->add('notice', 'Annonce bien enregistrée.');
-            // Puis on redirige vers la page de visualisation de cettte annonce
-            return $this->redirect($this->generateUrl('buildy_platform_view', array('id' => $advert->getId())));
-        }
-
-        // Si on n'est pas en POST, alors on affiche le formulaire
-        return $this->render('BUILDYPlatformBundle:Advert:add.html.twig');
+    // On vérifie que l'annonce avec cet id existe bien
+    if ($advert === null) {
+      throw $this->createNotFoundException("L'annonce d'id ".$id." n'existe pas.");
     }
 
-    public function editAction($id, Request $request)
-    {
-        if ($request->isMethod('POST')) {
-          $request->getSession()->getFlashBag()->add('notice', 'Annonce bien modifiée.');
-          return $this->redirect($this->generateUrl('buildy_platform_view', array('id' => 5)));
-        }
+    // On récupère la liste des advertSkill pour l'annonce $advert
+    $listAdvertSkills = $em->getRepository('BUILDYPlatformBundle:AdvertSkill')->findByAdvert($advert);
 
-        $em = $this->getDoctrine()->getManager();
-        $advert = $em->getRepository('BUILDYPlatformBundle:Advert')->find($id);
+    // Puis modifiez la ligne du render comme ceci, pour prendre en compte les variables :
+    return $this->render('BUILDYPlatformBundle:Advert:view.html.twig', array(
+      'advert'           => $advert,
+      'listAdvertSkills' => $listAdvertSkills,
+    ));
+  }
 
-        if (null === $advert) {
-          throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
-        }
+  public function addAction(Request $request)
+  {
+    // La gestion d'un formulaire est particulière, mais l'idée est la suivante :
 
-        // La méthode findAll retourne toutes les catégories de la base de données
-        $listCategories = $em->getRepository('BUILDYPlatformBundle:Category')->findAll();
+    if ($request->isMethod('POST')) {
+      // Ici, on s'occupera de la création et de la gestion du formulaire
 
-        // On boucle sur les catégories pour les lier à l'annonce
-        foreach ($listCategories as $category) {
-          $advert->addCategory($category);
-        }
+      $request->getSession()->getFlashBag()->add('info', 'Annonce bien enregistrée.');
 
-        $em->flush();
-
-
-        return $this->render('BUILDYPlatformBundle:Advert:edit.html.twig', array(
-          'advert' => $advert
-        ));
+      // Puis on redirige vers la page de visualisation de cet article
+      return $this->redirect($this->generateUrl('buildy_platform_view', array('id' => 1)));
     }
 
-    public function deleteAction($id)
-    {
-      $em = $this->getDoctrine()->getManager();
+    // Si on n'est pas en POST, alors on affiche le formulaire
+    return $this->render('BUILDYPlatformBundle:Advert:add.html.twig');
+  }
 
-      // On récupère l'annonce $id
-      $advert = $em->getRepository('BUILDYPlatformBundle:Advert')->find($id);
+  public function editAction($id)
+  {
+    // On récupère l'EntityManager
+    $em = $this->getDoctrine()->getManager();
 
-      if (null === $advert) {
-      throw new NotFoundHttpException("L'annonce d'id ".$id." n'existe pas.");
-      }
+    // On récupère l'entité correspondant à l'id $id
+    $advert = $em->getRepository('BUILDYPlatformBundle:Advert')->find($id);
 
-      // On boucle sur les catégories de l'annonce pour les supprimer
-      foreach ($advert->getCategories() as $category) {
-      $advert->removeCategory($category);
-      }
-      $em->flush();
-
-      return $this->render('BUILDYPlatformBundle:Advert:delete.html.twig');
+    // Si l'annonce n'existe pas, on affiche une erreur 404
+    if ($advert == null) {
+      throw $this->createNotFoundException("L'annonce d'id ".$id." n'existe pas.");
     }
 
-    public function menuAction($limit)
-    {
-        // On fixe en dur une liste ici, bien entendu par la suite
-        // on la récupérera depuis la BDD !
-        $listAdverts = array(
-          array('id' => 2, 'title' => 'Recherche développeur Symfony2'),
-          array('id' => 5, 'title' => 'Mission de webmaster'),
-          array('id' => 9, 'title' => 'Offre de stage webdesigner')
-        );
+    // Ici, on s'occupera de la création et de la gestion du formulaire
 
-        return $this->render('BUILDYPlatformBundle:Advert:menu.html.twig', array(
-          // Tout l'intérêt est ici : le contrôleur passe
-          // les variables nécessaires au template !
-          'listAdverts' => $listAdverts
-        ));
+    return $this->render('BUILDYPlatformBundle:Advert:edit.html.twig', array(
+      'advert' => $advert
+    ));
+  }
+
+  public function deleteAction($id, Request $request)
+  {
+    // On récupère l'EntityManager
+    $em = $this->getDoctrine()->getManager();
+
+    // On récupère l'entité correspondant à l'id $id
+    $advert = $em->getRepository('BUILDYPlatformBundle:Advert')->find($id);
+
+    // Si l'annonce n'existe pas, on affiche une erreur 404
+    if ($advert == null) {
+      throw $this->createNotFoundException("L'annonce d'id ".$id." n'existe pas.");
     }
 
-    public function testAction(Request $request){
+    if ($request->isMethod('POST')) {
+      // Si la requête est en POST, on deletea l'article
 
-            $em = $this->getDoctrine()->getManager();
+      $request->getSession()->getFlashBag()->add('info', 'Annonce bien supprimée.');
 
-            $advert = $em->getRepository('BUILDYPlatformBundle:Advert')->find(2);
-
-            // Création d'une première candidature
-            $application1 = new Application();
-            $application1->setAuthor('moi');
-            $application1->setContent("test");
-            $application1->setAdvert($advert);
-
-            $em->persist($application1);
-            $em->flush();
-
-            //message flash
-            $session = $request->getSession();
-            $session->getFlashBag()->add('info', 'done !');
-
-            return $this->render('BUILDYPlatformBundle:Advert:test.html.twig');
-
+      // Puis on redirige vers l'accueil
+      return $this->redirect($this->generateUrl('buildy_platform_home'));
     }
+
+    // Si la requête est en GET, on affiche une page de confirmation avant de delete
+    return $this->render('BUILDYPlatformBundle:Advert:delete.html.twig', array(
+      'advert' => $advert
+    ));
+  }
+
+  public function menuAction($limit = 3)
+  {
+    $listAdverts = $this->getDoctrine()
+      ->getManager()
+      ->getRepository('BUILDYPlatformBundle:Advert')
+      ->findBy(
+        array(),                 // Pas de critère
+        array('date' => 'desc'), // On trie par date décroissante
+        $limit,                  // On sélectionne $limit annonces
+        0                        // À partir du premier
+    );
+
+    return $this->render('BUILDYPlatformBundle:Advert:menu.html.twig', array(
+      'listAdverts' => $listAdverts
+    ));
+  }
 }

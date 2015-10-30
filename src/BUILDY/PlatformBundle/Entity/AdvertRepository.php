@@ -3,6 +3,7 @@
 namespace BUILDY\PlatformBundle\Entity;
 
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
  * AdvertRepository
@@ -12,29 +13,31 @@ use Doctrine\ORM\QueryBuilder;
  */
 class AdvertRepository extends \Doctrine\ORM\EntityRepository
 {
-    /**
-    * My personnel findAll method
-    */
-    public function myFindAll()
+
+    public function getAdverts($page, $nbPerPage)
     {
-        return $queryBuilder = $this
-            ->createQueryBuilder('a')
-            ->getQuery()
-            ->getResult();
+      $query = $this->createQueryBuilder('a')
+        // Jointure sur l'attribut image
+        ->leftJoin('a.image', 'i')
+        ->addSelect('i')
+        // Jointure sur l'attribut categories
+        ->leftJoin('a.categories', 'c')
+        ->addSelect('c')
+        ->orderBy('a.date', 'DESC')
+        ->getQuery()
+      ;
+
+     $query
+        // On définit l'annonce à partir de laquelle commencer la liste
+        ->setFirstResult(($page-1) * $nbPerPage)
+        // Ainsi que le nombre d'annonce à afficher sur une page
+        ->setMaxResults($nbPerPage)
+      ;
+
+      // Enfin, on retourne l'objet Paginator correspondant à la requête construite
+      return new Paginator($query, true);
     }
 
-    /**
-    * My personnel findOne method
-    */
-    public function myFindOne($id)
-    {
-        return $this
-          ->createQueryBuilder('a')
-          ->where('a.id = :id')
-          ->setParameter('id', $id)
-          ->getQuery()
-          ->getResult();
-    }
 
     /**
      * conditions : postées durant l'année en cours
@@ -49,25 +52,7 @@ class AdvertRepository extends \Doctrine\ORM\EntityRepository
         ->setParameter('end',   new \Datetime(date('Y').'-12-31'))  // Et le 31 décembre de cette année
       ;
     }
-    /**
-     * myFind method
-     * @return array object array
-     */
-    public function myFind()
-    {
-      $qb = $this
-        ->createQueryBuilder('a')
-        ->where('a.author = :author')
-        ->setParameter('author', 'Marine')
-      ;
-      $this->whereCurrentYear($qb);
-      $qb->orderBy('a.date', 'DESC');
 
-      return $qb
-        ->getQuery()
-        ->getResult()
-      ;
-   }
     /**
      * [getAdvertWithApplications description]
      * @return [type] [description]
@@ -97,7 +82,7 @@ class AdvertRepository extends \Doctrine\ORM\EntityRepository
             ->addSelect('cat')
             ->where($qb->expr()->in('c.name', $categoryNames))
       ;
-      
+
       return $qb
         ->getQuery()
         ->getResult()

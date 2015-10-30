@@ -1,350 +1,281 @@
 <?php
+// src/BUILDY/PlatformBundle/Entity/Advert.php
 
 namespace BUILDY\PlatformBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
 /**
- * Advert
- *
- * @ORM\Table(name="buildy_advert")
  * @ORM\Entity(repositoryClass="BUILDY\PlatformBundle\Entity\AdvertRepository")
  * @ORM\HasLifecycleCallbacks()
  */
 class Advert
 {
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
-    private $id;
+  /**
+   * @ORM\Column(name="id", type="integer")
+   * @ORM\Id
+   * @ORM\GeneratedValue(strategy="AUTO")
+   */
+  private $id;
 
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="date", type="datetime")
-     */
-    private $date;
+  /**
+   * @ORM\Column(name="date", type="datetime")
+   */
+  private $date;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="title", type="string", length=255)
-     */
-    private $title;
+  /**
+   * @ORM\Column(name="title", type="string", length=255, unique=true)
+   */
+  private $title;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="author", type="string", length=255)
-     */
-    private $author;
+  /**
+   * @ORM\Column(name="author", type="string", length=255)
+   */
+  private $author;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="content", type="text")
-     */
-    private $content;
+  /**
+   * @ORM\Column(name="content", type="text")
+   */
+  private $content;
 
-    /**
-     * @ORM\Column(name="published", type="boolean")
-     */
-    private $published = true;
+  /**
+   * @ORM\Column(name="published", type="boolean")
+   */
+  private $published = true;
 
-    /**
-    * @ORM\OneToOne(targetEntity="BUILDY\PlatformBundle\Entity\Image", cascade={"persist"})
-    */
-    private $image;
+  /**
+   * @ORM\OneToOne(targetEntity="BUILDY\PlatformBundle\Entity\Image", cascade={"persist", "remove"})
+   */
+  private $image;
 
-    /**
-    * @ORM\ManyToMany(targetEntity="BUILDY\PlatformBundle\Entity\Category", cascade={"persist"})
-    */
-   private $categories;
+  /**
+   * @ORM\ManyToMany(targetEntity="BUILDY\PlatformBundle\Entity\Category", cascade={"persist"})
+   */
+  private $categories;
 
-    /**
-    * @ORM\OneToMany(targetEntity="BUILDY\PlatformBundle\Entity\Application", mappedBy="advert")
-    */
-    private $applications; // Notez le « s », une annonce est liée à plusieurs candidatures
+  /**
+   * @ORM\OneToMany(targetEntity="BUILDY\PlatformBundle\Entity\Application", mappedBy="advert")
+   */
+  private $applications; // Notez le « s », une annonce est liée à plusieurs candidatures
 
-    /**
-     * @ORM\Column(name="updated_at", type="datetime", nullable=true)
-     */
-    private $updatedAt;
+  /**
+   * @ORM\Column(name="updated_at", type="datetime", nullable=true)
+   */
+  private $updatedAt;
 
-    /**
-     * @ORM\Column(name="nb_applications", type="integer")
-     */
-    private $nbApplications = 0;
+  /**
+   * @ORM\Column(name="nb_applications", type="integer")
+   */
+  private $nbApplications = 0;
 
-    /**
-     * @Gedmo\Slug(fields={"title"})
-     * @ORM\Column(length=128, unique=true)
-     */
-    private $slug;
+  /**
+   * @Gedmo\Slug(fields={"title"})
+   * @ORM\Column(length=128, unique=true)
+   */
+  private $slug;
 
-    /**
-    * Constructor
-    */
-    public function __construct()
-    {
-      // Par défaut, la date de l'annonce est la date d'aujourd'hui
-      $this->date = new \Datetime();
-      $this->categories = new ArrayCollection();
-    }
+  public function __construct()
+  {
+    $this->date         = new \Datetime();
+    $this->categories   = new ArrayCollection();
+    $this->applications = new ArrayCollection();
+  }
 
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
+  /**
+   * @return integer
+   */
+  public function getId()
+  {
+    return $this->id;
+  }
 
-    /**
-     * Set date
-     *
-     * @param \DateTime $date
-     *
-     * @return Advert
-     */
-    public function setDate($date)
-    {
-        $this->date = $date;
+  /**
+   * @param \DateTime $date
+   * @return Advert
+   */
+  public function setDate($date)
+  {
+    $this->date = $date;
+    return $this;
+  }
 
-        return $this;
-    }
+  /**
+   * @return \DateTime
+   */
+  public function getDate()
+  {
+    return $this->date;
+  }
 
-    /**
-     * Get date
-     *
-     * @return \DateTime
-     */
-    public function getDate()
-    {
-        return $this->date;
-    }
+  /**
+   * @param string $title
+   * @return Advert
+   */
+  public function setTitle($title)
+  {
+    $this->title = $title;
+    return $this;
+  }
 
-    /**
-     * Set title
-     *
-     * @param string $title
-     *
-     * @return Advert
-     */
-    public function setTitle($title)
-    {
-        $this->title = $title;
+  /**
+   * @return string
+   */
+  public function getTitle()
+  {
+    return $this->title;
+  }
 
-        return $this;
-    }
+  /**
+   * @param string $author
+   * @return Advert
+   */
+  public function setAuthor($author)
+  {
+    $this->author = $author;
+    return $this;
+  }
 
-    /**
-     * Get title
-     *
-     * @return string
-     */
-    public function getTitle()
-    {
-        return $this->title;
-    }
+  /**
+   * @return string
+   */
+  public function getAuthor()
+  {
+    return $this->author;
+  }
 
-    /**
-     * Set author
-     *
-     * @param string $author
-     *
-     * @return Advert
-     */
-    public function setAuthor($author)
-    {
-        $this->author = $author;
+  /**
+   * @param string $content
+   * @return Advert
+   */
+  public function setContent($content)
+  {
+    $this->content = $content;
+    return $this;
+  }
 
-        return $this;
-    }
+  /**
+   * @return string
+   */
+  public function getContent()
+  {
+    return $this->content;
+  }
 
-    /**
-     * Get author
-     *
-     * @return string
-     */
-    public function getAuthor()
-    {
-        return $this->author;
-    }
+  /**
+   * @param boolean $published
+   * @return Advert
+   */
+  public function setPublished($published)
+  {
+    $this->published = $published;
+    return $this;
+  }
 
-    /**
-     * Set content
-     *
-     * @param string $content
-     *
-     * @return Advert
-     */
-    public function setContent($content)
-    {
-        $this->content = $content;
+  /**
+   * @return boolean
+   */
+  public function getPublished()
+  {
+    return $this->published;
+  }
 
-        return $this;
-    }
+  /**
+   * @param Image $image
+   * @return Advert
+   */
+  public function setImage(Image $image = null)
+  {
+    $this->image = $image;
+    return $this;
+  }
 
-    /**
-     * Get content
-     *
-     * @return string
-     */
-    public function getContent()
-    {
-        return $this->content;
-    }
+  /**
+   * @return Image
+   */
+  public function getImage()
+  {
+    return $this->image;
+  }
 
-    /**
-     * Set published
-     *
-     * @param boolean $published
-     *
-     * @return Advert
-     */
-    public function setPublished($published)
-    {
-        $this->published = $published;
+  public function addCategory(Category $category)
+  {
+    $this->categories[] = $category;
+    return $this;
+  }
 
-        return $this;
-    }
+  public function removeCategory(Category $category)
+  {
+    $this->categories->removeElement($category);
+  }
 
-    /**
-     * Get published
-     *
-     * @return boolean
-     */
-    public function getPublished()
-    {
-        return $this->published;
-    }
+  public function getCategories()
+  {
+    return $this->categories;
+  }
 
-    /**
-     * Set image
-     *
-     * @param \BUILDY\PlatformBundle\Entity\Image $image
-     *
-     * @return Advert
-     */
-    public function setImage(\BUILDY\PlatformBundle\Entity\Image $image = null)
-    {
-        $this->image = $image;
+  /**
+   * @param Application $application
+   * @return Advert
+   */
+  public function addApplication(Application $application)
+  {
+    $this->applications[] = $application;
 
-        return $this;
-    }
+    // On lie l'annonce à la candidature
+    $application->setAdvert($this);
 
-    /**
-     * Get image
-     *
-     * @return \BUILDY\PlatformBundle\Entity\Image
-     */
-    public function getImage()
-    {
-        return $this->image;
-    }
+    return $this;
+  }
 
-    // Notez le singulier, on ajoute une seule catégorie à la fois
-    public function addCategory(Category $category)
-    {
-      // Ici, on utilise l'ArrayCollection vraiment comme un tableau
-      $this->categories[] = $category;
+  /**
+   * @param Application $application
+   */
+  public function removeApplication(Application $application)
+  {
+    $this->applications->removeElement($application);
 
-      return $this;
-    }
+    // Et si notre relation était facultative (nullable=true, ce qui n'est pas notre cas ici attention) :
+    // $application->setAdvert(null);
+  }
 
-    public function removeCategory(Category $category)
-    {
-      // Ici on utilise une méthode de l'ArrayCollection, pour supprimer la catégorie en argument
-      $this->categories->removeElement($category);
-    }
+  /**
+   * @return ArrayCollection
+   */
+  public function getApplications()
+  {
+    return $this->applications;
+  }
 
-    // Notez le pluriel, on récupère une liste de catégories ici !
-    public function getCategories()
-    {
-      return $this->categories;
-    }
+  /**
+   * @ORM\PreUpdate
+   */
+  public function updateDate()
+  {
+    $this->setUpdatedAt(new \Datetime());
+  }
 
-    /**
-     * Add application
-     *
-     * @param \BUILDY\PlatformBundle\Entity\Application $application
-     *
-     * @return Advert
-     */
-    public function addApplication(\BUILDY\PlatformBundle\Entity\Application $application)
-    {
-        $this->applications[] = $application;
-        // On lie l'annonce à la candidature
-        $application->setAdvert($this);
+  public function setUpdatedAt(\Datetime $updatedAt)
+  {
+    $this->updatedAt = $updatedAt;
+    return $this;
+  }
 
-        return $this;
-    }
+  public function getUpdatedAt()
+  {
+    return $this->updatedAt;
+  }
 
-    /**
-     * Remove application
-     *
-     * @param \BUILDY\PlatformBundle\Entity\Application $application
-     */
-    public function removeApplication(\BUILDY\PlatformBundle\Entity\Application $application)
-    {
-        $this->applications->removeElement($application);
-        // Et si notre relation était facultative (nullable=true, ce qui n'est pas notre cas ici attention) :
-        // $application->setAdvert(null);
-    }
+  public function increaseApplication()
+  {
+    $this->nbApplications++;
+  }
 
-    /**
-     * Get applications
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getApplications()
-    {
-        return $this->applications;
-    }
-
-    /**
-     * Set updatedAt
-     *
-     * @param \DateTime $updatedAt
-     *
-     * @return Advert
-     */
-    public function setUpdatedAt($updatedAt)
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
-
-    /**
-     * Get updatedAt
-     *
-     * @return \DateTime
-     */
-    public function getUpdatedAt()
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * @ORM\PreUpdate
-     * callback to update the updatedAt attribute
-     * @return [type] [description]
-     */
-     public function updateDate()
-     {
-        $this->setUpdatedAt(new \Datetime());
-     }
-
+  public function decreaseApplication()
+  {
+    $this->nbApplications--;
+  }
 
     /**
      * Set nbApplications
@@ -368,16 +299,6 @@ class Advert
     public function getNbApplications()
     {
         return $this->nbApplications;
-    }
-
-    public function increaseApplication()
-    {
-      $this->nbApplications++;
-    }
-
-    public function decreaseApplication()
-    {
-      $this->nbApplications--;
     }
 
     /**
