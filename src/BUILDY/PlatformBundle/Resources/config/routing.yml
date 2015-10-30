@@ -8,8 +8,8 @@ buildy_platform_view:
     path:      /advert/{id}
     defaults:  { _controller: BUILDYPlatformBundle:Advert:view }
     requirements:
-        id : \d+    
-        
+        id : \d+
+
 buildy_platform_edit:
     path:      /edit/{id}
     defaults:  { _controller: BUILDYPlatformBundle:Advert:edit }
@@ -21,7 +21,11 @@ buildy_platform_delete:
     defaults:  { _controller: BUILDYPlatformBundle:Advert:delete }
     requirements:
         id: \d+
-    
+
 buildy_platform_add:
     path:      /add
     defaults:  { _controller: BUILDYPlatformBundle:Advert:add }
+
+buildy_platform_test:
+    path:      /test
+    defaults:  { _controller: BUILDYPlatformBundle:Advert:test }

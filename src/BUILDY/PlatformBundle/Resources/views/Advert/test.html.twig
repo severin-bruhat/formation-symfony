@@ -1,0 +1,22 @@
+{# src/BUILDY/PlatformBundle/Resources/views/Advert/test.html.twig #}
+
+{% extends "BUILDYCoreBundle::base.html.twig" %}
+
+{% block title %}
+ TEST
+{% endblock %}
+
+{% block buildyplatform_body %}
+  <div class="container">
+
+    <h1>TEST</h1>
+
+    <div class="bg-info">
+      {% for message in app.session.flashbag.get('info') %}
+        <p>Message flash : {{ message }}</p>
+      {% endfor %}
+    </div>
+
+  </div>
+
+{% endblock %}

@@ -2,3 +2,10 @@ services:
     buildy_platform.antispam:
         class: BUILDY\PlatformBundle\Services\Antispam\BUILDYAntispam
         arguments: [@mailer, %locale%, 50]
+
+    buildy_platform.doctrine.notification:
+        class: BUILDY\PlatformBundle\DoctrineListener\ApplicationNotification
+        arguments: [@mailer]
+        tags:
+            - { name: doctrine.event_listener, event: postPersist }
+     

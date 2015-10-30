@@ -131,8 +131,6 @@ class AdvertController extends Controller
         $em->persist($advertSkill);
       }
 
-      // On récupère l'EntityManager
-      $em = $this->getDoctrine()->getManager();
 
       // Étape 1 : On « persiste » l'entité
       $em->persist($advert);
@@ -225,5 +223,28 @@ class AdvertController extends Controller
           // les variables nécessaires au template !
           'listAdverts' => $listAdverts
         ));
+    }
+
+    public function testAction(Request $request){
+
+            $em = $this->getDoctrine()->getManager();
+
+            $advert = $em->getRepository('BUILDYPlatformBundle:Advert')->find(2);
+
+            // Création d'une première candidature
+            $application1 = new Application();
+            $application1->setAuthor('moi');
+            $application1->setContent("test");
+            $application1->setAdvert($advert);
+
+            $em->persist($application1);
+            $em->flush();
+
+            //message flash
+            $session = $request->getSession();
+            $session->getFlashBag()->add('info', 'done !');
+
+            return $this->render('BUILDYPlatformBundle:Advert:test.html.twig');
+
     }
 }
