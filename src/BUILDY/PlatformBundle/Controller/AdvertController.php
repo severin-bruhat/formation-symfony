@@ -8,6 +8,8 @@ use Symfony\Component\HttpFoundation\Request;
 use BUILDY\PlatformBundle\Entity\Advert;
 use BUILDY\PlatformBundle\Form\AdvertType;
 use BUILDY\PlatformBundle\Form\AdvertEditType;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+
 
 class AdvertController extends Controller
 {
@@ -67,6 +69,13 @@ class AdvertController extends Controller
 
   public function addAction(Request $request)
   {
+
+     // On vérifie que l'utilisateur dispose bien du rôle ROLE_AUTEUR
+     if (!$this->get('security.context')->isGranted('ROLE_AUTEUR')) {
+       // Sinon on déclenche une exception « Accès interdit »
+       throw new AccessDeniedException('Accès limité aux auteurs.');
+     }
+
      $advert = new Advert();
      $form = $this->get('form.factory')->create(new AdvertType, $advert);
 
@@ -134,7 +143,7 @@ class AdvertController extends Controller
 
       return $this->redirect($this->generateUrl('buildy_platform_home'));
     }
-    
+
     // Si la requête est en GET, on affiche une page de confirmation avant de supprimer
     return $this->render('BUILDYPlatformBundle:Advert:delete.html.twig', array(
       'advert' => $advert,

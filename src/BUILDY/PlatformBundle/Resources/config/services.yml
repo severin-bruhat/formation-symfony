@@ -1,11 +1,20 @@
 services:
     buildy_platform.antispam:
         class: BUILDY\PlatformBundle\Services\Antispam\BUILDYAntispam
-        arguments: [@mailer, %locale%, 50]
+        arguments: [@mailer, 50]
+        calls:
+            - [ setLocale, [ %locale% ] ]
+        tags:
+            - { name: twig.ewtension}
 
     buildy_platform.doctrine.notification:
         class: BUILDY\PlatformBundle\DoctrineListener\ApplicationNotification
         arguments: [@mailer]
         tags:
             - { name: doctrine.event_listener, event: postPersist }
-     
+
+    buildy_platform.validator.antiflood:
+        class: BUILDY\PlatformBundle\Validator\AntifloodValidator     # La classe du service, ici notre validateur déjà créé
+        arguments: [@request_stack, @doctrine.orm.entity_manager] # Les données qu'on injecte au service : la requête et l'EntityManager
+        tags:
+            - { name: validator.constraint_validator, alias: buildy_platform_antiflood }  # C'est avec l'alias qu'on retrouvera le service
