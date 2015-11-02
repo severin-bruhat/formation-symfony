@@ -5,6 +5,7 @@ namespace BUILDY\PlatformBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use BUILDY\PlatformBundle\Entity\Advert;
 
 class AdvertController extends Controller
 {
@@ -64,19 +65,28 @@ class AdvertController extends Controller
 
   public function addAction(Request $request)
   {
-    // La gestion d'un formulaire est particulière, mais l'idée est la suivante :
+    // On crée un objet Advert
+    $advert = new Advert();
 
-    if ($request->isMethod('POST')) {
-      // Ici, on s'occupera de la création et de la gestion du formulaire
+     // On crée le FormBuilder grâce au service form factory
+     $form = $this->get('form.factory')->create(new AdvertType, $advert);
 
-      $request->getSession()->getFlashBag()->add('info', 'Annonce bien enregistrée.');
+     $form->handleRequest($request);
 
-      // Puis on redirige vers la page de visualisation de cet article
-      return $this->redirect($this->generateUrl('buildy_platform_view', array('id' => 1)));
-    }
+     if ($form->isValid()) {
+         // On l'enregistre notre objet $advert dans la base de données, par exemple
+         $em = $this->getDoctrine()->getManager();
+         $em->persist($advert);
+         $em->flush();
+         $request->getSession()->getFlashBag()->add('notice', 'Annonce bien enregistrée.');
 
-    // Si on n'est pas en POST, alors on affiche le formulaire
-    return $this->render('BUILDYPlatformBundle:Advert:add.html.twig');
+         // On redirige vers la page de visualisation de l'annonce nouvellement créée
+         return $this->redirect($this->generateUrl('buildy_platform_view', array('id' => $advert->getId())));
+       }
+
+    return $this->render('BUILDYPlatformBundle:Advert:add.html.twig', array(
+                         'form' => $form->createView())
+                     );
   }
 
   public function editAction($id)
