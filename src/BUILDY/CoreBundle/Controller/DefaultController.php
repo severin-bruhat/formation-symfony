@@ -18,7 +18,7 @@ class DefaultController extends Controller
         ->getRepository('BUILDYPlatformBundle:Advert')
         ->findAll(
           array('date' => 'desc'),
-          3,                              
+          3,
           0
         );
 

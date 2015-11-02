@@ -13,6 +13,14 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  */
 class AdvertRepository extends \Doctrine\ORM\EntityRepository
 {
+    public function getPublishedQueryBuilder()
+     {
+       return $this
+         ->createQueryBuilder('a')
+         ->where('a.published = :published')
+         ->setParameter('published', true)
+       ;
+     }
 
     public function getAdverts($page, $nbPerPage)
     {
