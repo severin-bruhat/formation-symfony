@@ -18,10 +18,17 @@ services:
         arguments: [@request_stack, @doctrine.orm.entity_manager] # Les données qu'on injecte au service : la requête et l'EntityManager
         tags:
             - { name: validator.constraint_validator, alias: buildy_platform_antiflood }  # C'est avec l'alias qu'on retrouvera le service
+
     buildy_platform.beta.html:
         class: BUILDY\PlatformBundle\Beta\BetaHTML
+
     buildy_platform.beta.listener:
         class: BUILDY\PlatformBundle\Beta\BetaListener
         arguments: [@buildy_platform.beta.html, "2013-10-20"]
         tags:
             - { name: kernel.event_listener, event: kernel.response, method: processBeta }
+
+    buildy_platform.json_paramconverter:
+        class: BUILDY\PlatformBundle\ParamConverter\JsonParamConverter
+        tags:
+            - { name: request.param_converter }

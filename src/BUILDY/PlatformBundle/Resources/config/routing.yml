@@ -26,6 +26,6 @@ buildy_platform_add:
     path:      /add
     defaults:  { _controller: BUILDYPlatformBundle:Advert:add }
 
-buildy_platform_test:
-    path:      /test
-    defaults:  { _controller: BUILDYPlatformBundle:Advert:test }
+buildy_platform_paramconverter:
+    path: /test/{json}
+    defaults: { _controller: "BUILDYPlatformBundle:Advert:ParamConverter" }

@@ -45,8 +45,8 @@ class Advert
   /**
    * @ORM\Column(name="content", type="text")
    * @Assert\NotBlank()
-   * @AntiFlood()
    */
+  //@AntiFlood()
   private $content;
 
   /**

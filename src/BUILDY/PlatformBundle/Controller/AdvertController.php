@@ -5,7 +5,9 @@ namespace BUILDY\PlatformBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
 
 use BUILDY\PlatformBundle\Entity\Advert;
 use BUILDY\PlatformBundle\Form\AdvertType;
@@ -47,21 +49,20 @@ class AdvertController extends Controller
     ));
   }
 
-  public function viewAction($id)
+  public function viewAction(Advert $advert)
   {
-    // On récupère l'EntityManager
+    /* plus besoin grâce au DoctrineParamConverter
     $em = $this->getDoctrine()->getManager();
-
-    // Pour récupérer une annonce unique : on utilise find()
     $advert = $em->getRepository('BUILDYPlatformBundle:Advert')->find($id);
-
-    // On vérifie que l'annonce avec cet id existe bien
     if ($advert === null) {
       throw $this->createNotFoundException("L'annonce d'id ".$id." n'existe pas.");
-    }
+    }*/
 
     // On récupère la liste des advertSkill pour l'annonce $advert
-    $listAdvertSkills = $em->getRepository('BUILDYPlatformBundle:AdvertSkill')->findByAdvert($advert);
+    $listAdvertSkills = $this->getDoctrine()
+                      ->getManager()
+                      ->getRepository('BUILDYPlatformBundle:AdvertSkill')
+                      ->findByAdvert($advert);
 
     // Puis modifiez la ligne du render comme ceci, pour prendre en compte les variables :
     return $this->render('BUILDYPlatformBundle:Advert:view.html.twig', array(
@@ -74,10 +75,10 @@ class AdvertController extends Controller
   {
 
      // On vérifie que l'utilisateur dispose bien du rôle ROLE_AUTEUR
-     if (!$this->get('security.context')->isGranted('ROLE_AUTEUR')) {
+     /*if (!$this->get('security.context')->isGranted('ROLE_AUTEUR')) {
        // Sinon on déclenche une exception « Accès interdit »
        throw new AccessDeniedException('Accès limité aux auteurs.');
-     }
+     }*/
 
      $advert = new Advert();
      $form = $this->get('form.factory')->create(new AdvertType, $advert);
@@ -85,7 +86,7 @@ class AdvertController extends Controller
      if ($form->handleRequest($request)->isValid()) {
 
        // On crée l'évènement avec ses 2 arguments
-        $event = new MessagePostEvent($advert->getContent(), $advert->getUser());
+      /*  $event = new MessagePostEvent($advert->getContent(), $advert->getUser());
 
         // On déclenche l'évènement
         $this
@@ -93,7 +94,7 @@ class AdvertController extends Controller
           ->dispatch(BigbrotherEvents::onMessagePost, $event)
         ;
 
-        $advert->setContent($event->getMessage());
+        $advert->setContent($event->getMessage());*/
 
          $em = $this->getDoctrine()->getManager();
          $em->persist($advert);
@@ -188,5 +189,13 @@ class AdvertController extends Controller
     return $this->render('BUILDYPlatformBundle:Advert:translation.html.twig', array(
       'name' => $name
     ));
+  }
+
+  /**
+   * @ParamConverter("json")
+   */
+  public function ParamConverterAction($json)
+  {
+    return new Response(print_r($json, true));
   }
 }
