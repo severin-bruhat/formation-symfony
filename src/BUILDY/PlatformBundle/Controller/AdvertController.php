@@ -5,10 +5,13 @@ namespace BUILDY\PlatformBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+
 use BUILDY\PlatformBundle\Entity\Advert;
 use BUILDY\PlatformBundle\Form\AdvertType;
 use BUILDY\PlatformBundle\Form\AdvertEditType;
-use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use BUILDY\PlatformBundle\Bigbrother\BigbrotherEvents;
+use BUILDY\PlatformBundle\Bigbrother\MessagePostEvent;
 
 
 class AdvertController extends Controller
@@ -80,6 +83,17 @@ class AdvertController extends Controller
      $form = $this->get('form.factory')->create(new AdvertType, $advert);
 
      if ($form->handleRequest($request)->isValid()) {
+
+       // On crée l'évènement avec ses 2 arguments
+        $event = new MessagePostEvent($advert->getContent(), $advert->getUser());
+
+        // On déclenche l'évènement
+        $this
+          ->get('event_dispatcher')
+          ->dispatch(BigbrotherEvents::onMessagePost, $event)
+        ;
+
+        $advert->setContent($event->getMessage());
 
          $em = $this->getDoctrine()->getManager();
          $em->persist($advert);
