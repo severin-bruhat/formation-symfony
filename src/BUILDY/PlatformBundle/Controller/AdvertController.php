@@ -182,4 +182,11 @@ class AdvertController extends Controller
       'listAdverts' => $listAdverts
     ));
   }
+
+  public function translationAction($name)
+  {
+    return $this->render('BUILDYPlatformBundle:Advert:translation.html.twig', array(
+      'name' => $name
+    ));
+  }
 }
